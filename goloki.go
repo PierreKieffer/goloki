@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strconv"
 	"time"
 )
@@ -21,45 +22,27 @@ type StreamObject struct {
 
 type Value []string
 
-func Log(logLine string, optLabels ...map[string]interface{}) *LogObject {
+func Log(logData interface{}, optLabels ...map[string]interface{}) *LogObject {
 	/*
-		Generate LogObject from single log
+		Generate LogObject for single log or group of logs
 	*/
 
 	ts := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
 
-	var labels = make(map[string]interface{})
-
-	if len(optLabels) > 0 {
-		labels = optLabels[0]
-	}
-
-	log := LogObject{
-		Streams: []StreamObject{
-			StreamObject{
-				Stream: labels,
-				Values: []Value{
-					Value{ts, logLine},
-				},
-			},
-		},
-	}
-	return &log
-}
-
-func LogGroup(logLines []string, optLabels ...map[string]interface{}) *LogObject {
-	/*
-		Generate LogObject from multiple logs
-	*/
-
-	ts := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
-
-	var labels = make(map[string]interface{})
+	logDataType := reflect.TypeOf(logData).Kind()
 
 	var values []Value
-	for _, logLine := range logLines {
-		values = append(values, Value{ts, logLine})
+
+	switch logDataType {
+	case reflect.Slice:
+		for _, logLine := range logData.([]string) {
+			values = append(values, Value{ts, logLine})
+		}
+	case reflect.String:
+		values = append(values, Value{ts, logData.(string)})
 	}
+
+	var labels = make(map[string]interface{})
 
 	if len(optLabels) > 0 {
 		labels = optLabels[0]
