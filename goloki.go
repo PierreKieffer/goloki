@@ -21,7 +21,10 @@ type StreamObject struct {
 
 type Value []string
 
-func Log(message string, optLabels ...map[string]interface{}) *LogObject {
+func Log(logLine string, optLabels ...map[string]interface{}) *LogObject {
+	/*
+		Generate LogObject from single log
+	*/
 
 	ts := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
 
@@ -36,7 +39,7 @@ func Log(message string, optLabels ...map[string]interface{}) *LogObject {
 			StreamObject{
 				Stream: labels,
 				Values: []Value{
-					Value{ts, message},
+					Value{ts, logLine},
 				},
 			},
 		},
@@ -44,15 +47,18 @@ func Log(message string, optLabels ...map[string]interface{}) *LogObject {
 	return &log
 }
 
-func LogGroup(messages []string, optLabels ...map[string]interface{}) *LogObject {
+func LogGroup(logLines []string, optLabels ...map[string]interface{}) *LogObject {
+	/*
+		Generate LogObject from multiple logs
+	*/
 
 	ts := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
 
 	var labels = make(map[string]interface{})
 
 	var values []Value
-	for _, m := range messages {
-		values = append(values, Value{ts, m})
+	for _, logLine := range logLines {
+		values = append(values, Value{ts, logLine})
 	}
 
 	if len(optLabels) > 0 {
