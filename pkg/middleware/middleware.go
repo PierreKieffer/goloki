@@ -5,73 +5,62 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
-	// "goloki/pkg/configuration"
 	"net/http"
+	"strconv"
+	"time"
 )
 
-type Log struct {
+type LogObject struct {
 	Streams []StreamObject `json:"streams"`
 }
+
 type StreamObject struct {
-	Entries []EntryObject          `json:"entries"`
-	Labels  map[string]interface{} `json:"labels"`
-}
-type EntryObject struct {
-	Line      string `json:"line"`
-	Timestamp string `json:"ts"`
+	Stream map[string]interface{} `json:"stream"`
+	Values []Value                `json:"values"`
 }
 
-/*
-{
-    "streams": [
-        {
-            "entries": [
-                {
-                    "line": "fizzbuzz",
-                    "ts": "2021-06-08T05:28:06.801064-04:00"
-                }
-            ],
-            "labels": "{foo=\"bar\"}"
-        }
-    ]
-}
+type Value []string
 
+func Log(message string, optLabels ...map[string]interface{}) *LogObject {
 
-curl -H "Content-Type: application/json" -XPOST -s "http://23.251.135.162:3100/loki/api/v1/push" --data-raw \
-  '{"streams": [{ "labels": "{foo=\"bar\"}", "entries": [{ "ts": "2021-06-08T05:28:06.801064-04:00", "line": "fizzbuzz" }] }]}'
-*/
+	ts := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
 
-// func (l *Log) Push(config *configuration.Configuration) {
-// /*
-// Send log entries to Loki
-// */
+	var labels = make(map[string]interface{})
 
-// endpoint := fmt.Sprintf("%v/loki/api/v1/push", config.LokiUrl)
+	if len(optLabels) > 0 {
+		labels = optLabels[0]
+	}
 
-// }
-
-func InitLog(message string, labels map[string]interface{}) *Log {
-	ts := time.Now().UTC().Format(time.RFC3339)
-	log := Log{
+	log := LogObject{
 		Streams: []StreamObject{
 			StreamObject{
-				Entries: []EntryObject{
-					EntryObject{
-						Line:      message,
-						Timestamp: ts,
-					},
+				Stream: labels,
+				Values: []Value{
+					Value{ts, message},
 				},
-				Labels: labels,
 			},
 		},
 	}
 	return &log
+}
 
+func (l *LogObject) Push(lokiUrl string) error {
+	/*
+	   Send log entries to Loki
+	*/
+
+	endpoint := fmt.Sprintf("%v/loki/api/v1/push", lokiUrl)
+
+	err := PostRequest(endpoint, l)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func PostRequest(endpoint string, payload interface{}) error {
 	jsonPayload, _ := json.Marshal(payload)
+
 	client := &http.Client{}
 
 	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(jsonPayload))
@@ -86,7 +75,7 @@ func PostRequest(endpoint string, payload interface{}) error {
 		return err
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != 204 {
 		return errors.New(fmt.Sprintf("middleWare.PostRequest http status code %v", resp.StatusCode))
 	}
 	return nil
