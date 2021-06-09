@@ -44,6 +44,32 @@ func Log(message string, optLabels ...map[string]interface{}) *LogObject {
 	return &log
 }
 
+func LogGroup(messages []string, optLabels ...map[string]interface{}) *LogObject {
+
+	ts := strconv.FormatInt(time.Now().UTC().UnixNano(), 10)
+
+	var labels = make(map[string]interface{})
+
+	var values []Value
+	for _, m := range messages {
+		values = append(values, Value{ts, m})
+	}
+
+	if len(optLabels) > 0 {
+		labels = optLabels[0]
+	}
+
+	log := LogObject{
+		Streams: []StreamObject{
+			StreamObject{
+				Stream: labels,
+				Values: values,
+			},
+		},
+	}
+	return &log
+}
+
 func (l *LogObject) Push(lokiUrl string) error {
 	/*
 	   Send log entries to Loki

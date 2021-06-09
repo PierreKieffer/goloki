@@ -9,7 +9,7 @@ Go middleware for Grafana Loki's HTTP API
 	* [Log](#log)
 	* [Push](#push)
 	* [Labels](#labels)
-
+	* [LogGroup](#loggroup)
 
 ## Install 
 
@@ -65,6 +65,22 @@ labels["foo"] = "bar"
 log := goloki.Log("log line", labels)
 
 log.Push("http://loki:3100")
+```
+
+### LogGroup 
+Push multiple logs
+
+```go
+var labels = make(map[string]interface{})
+labels["level"] = "INFO"
+labels["foo"] = "bar"
+
+log1 := "log line 1"
+log2 := "log line 2"
+
+lg := goloki.LogGroup([]string{log1, log2}, labels)
+lg.Push("http://loki:3100")
+
 ```
 
 
