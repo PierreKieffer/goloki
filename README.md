@@ -1,6 +1,6 @@
 # goloki
 
-Go middleware for Loki HTTP API 
+Go middleware for Grafana Loki's HTTP API 
 
 
 * [Install](#install)
