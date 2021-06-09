@@ -39,13 +39,13 @@ go get github.com/PierreKieffer/goloki
 ```go
 import (
 	"fmt"
-	"goloki/pkg/middleware"
+	"github.com/PierreKieffer/goloki"
 )
 ```
 
 ### Log 
 ```go 
-log := middleware.Log("log line")
+log := goloki.Log("log line")
 ```
 
 ### Push 
@@ -62,7 +62,7 @@ var labels = make(map[string]interface{})
 labels["level"] = "INFO"
 labels["foo"] = "bar"
 
-log := middleware.Log("log line", labels)
+log := goloki.Log("log line", labels)
 
 log.Push("http://loki:3100")
 ```
