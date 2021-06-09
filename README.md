@@ -39,7 +39,6 @@ go get github.com/PierreKieffer/goloki
 ## Usage
 ```go
 import (
-	"fmt"
 	"github.com/PierreKieffer/goloki"
 )
 ```
