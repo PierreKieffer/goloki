@@ -55,7 +55,7 @@ log := goloki.Log("log line")
 l1 := "log line 1"
 l2 := "log line 2"
 
-log := goloki.Log([]string{l1, l2}, labels)
+log := goloki.Log([]string{l1, l2})
 ```
 ### Push 
 ```go
