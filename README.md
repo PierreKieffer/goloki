@@ -1,6 +1,6 @@
 # goloki
 
-Go middleware for Loki API 
+Go middleware for Loki HTTP API 
 
 
 * [Install](#install)
